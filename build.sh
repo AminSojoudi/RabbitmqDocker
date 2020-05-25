@@ -1,0 +1,1 @@
+docker build -t aminsojoudi/rabbitmq-managment-eventexchange:latest .
