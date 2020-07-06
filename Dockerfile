@@ -26,5 +26,6 @@ RUN set -eux; \
 
 RUN rabbitmq-plugins enable rabbitmq_event_exchange
 RUN rabbitmq-plugins enable rabbitmq_prometheus
+RUN rabbitmq-plugins enable rabbitmq_consistent_hash_exchange
 
 EXPOSE 15671 15672
