@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Login to DockerHub Registry
+      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: | 
+        docker build . -t docker.io/aminsojoudi/rabbitmq-managment-eventexchange:latest --platform linux/amd64 
+        docker push aminsojoudi/rabbitmq-managment-eventexchange:latest
