@@ -1,28 +1,20 @@
-FROM rabbitmq:3.8
+FROM rabbitmq:3.13
 
-RUN rabbitmq-plugins enable --offline rabbitmq_management
-
-# extract "rabbitmqadmin" from inside the "rabbitmq_management-X.Y.Z.ez" plugin zipfile
+RUN set eux; \
+	rabbitmq-plugins enable --offline rabbitmq_management; \
+# make sure the metrics collector is re-enabled (disabled in the base image for Prometheus-style metrics by default)
+	rm -f /etc/rabbitmq/conf.d/20-management_agent.disable_metrics_collector.conf; \
+# grab "rabbitmqadmin" from inside the "rabbitmq_management-X.Y.Z" plugin folder
 # see https://github.com/docker-library/rabbitmq/issues/207
-RUN set -eux; \
-	erl -noinput -eval ' \
-		{ ok, AdminBin } = zip:foldl(fun(FileInArchive, GetInfo, GetBin, Acc) -> \
-			case Acc of \
-				"" -> \
-					case lists:suffix("/rabbitmqadmin", FileInArchive) of \
-						true -> GetBin(); \
-						false -> Acc \
-					end; \
-				_ -> Acc \
-			end \
-		end, "", init:get_plain_arguments()), \
-		io:format("~s", [ AdminBin ]), \
-		init:stop(). \
-	' -- /plugins/rabbitmq_management-*.ez > /usr/local/bin/rabbitmqadmin; \
+	cp /plugins/rabbitmq_management-*/priv/www/cli/rabbitmqadmin /usr/local/bin/rabbitmqadmin; \
 	[ -s /usr/local/bin/rabbitmqadmin ]; \
 	chmod +x /usr/local/bin/rabbitmqadmin; \
-	apt-get update; apt-get install -y --no-install-recommends python; rm -rf /var/lib/apt/lists/*; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends python3; \
+	rm -rf /var/lib/apt/lists/*; \
 	rabbitmqadmin --version
+
+EXPOSE 15671 15672
 
 RUN rabbitmq-plugins enable rabbitmq_event_exchange
 RUN rabbitmq-plugins enable rabbitmq_prometheus
