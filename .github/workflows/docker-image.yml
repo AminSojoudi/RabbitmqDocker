@@ -18,4 +18,6 @@ jobs:
       run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: bash PushToDockerHub.sh
+      run: |
+        docker build . -t docker.io/aminsojoudi/rabbitmq-managment-eventexchange:latest --platform linux/amd64
+        docker push aminsojoudi/rabbitmq-managment-eventexchange:latest
